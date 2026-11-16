@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MERYCHAT</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#102c35;color:white;font-family:Arial}
+header{background:#19414a;padding:18px;display:flex;gap:12px;align-items:center}
+header button{background:none;color:white;border:0;font-size:23px}
+#title{font-size:21px;color:#50d6b0;font-weight:bold}
+#messages{height:calc(100dvh - 145px);overflow-y:auto;padding:15px}
+.bubble{background:#24515a;padding:12px 15px;margin:10px 0;border-radius:16px;max-width:80%;width:max-content;overflow-wrap:anywhere}
+.mine{background:#167e6c;margin-left:auto}
+footer{position:fixed;bottom:0;width:100%;padding:12px;background:#19414a;display:flex;gap:8px}
+input{flex:1;min-width:0;padding:14px;border:0;border-radius:22px;font-size:16px}
+footer button{background:#50d6b0;border:0;border-radius:50%;width:48px;font-size:20px}
+</style>
+</head>
+<body>
+<header>
+<button onclick="back()">‹</button>
+<div id="title">MERYCHAT</div>
+</header>
+<div id="messages"></div>
+<footer>
+<input id="msg" placeholder="Mesaj yaz..." onkeydown="if(event.key==='Enter')send()">
+<button onclick="send()">➤</button>
+</footer>
+<script>
+let chats=JSON.parse(localStorage.getItem('merychat_chats')||'[]');
+let index=Number(localStorage.getItem('merychat_open')||0);
+let current=chats[index];
+if(!current){
+current={name:'Deneme sohbeti',last:'',messages:[]};
+chats.push(current);
+index=chats.length-1;
+}
+current.messages=current.messages||[];
+document.getElementById('title').textContent=current.name;
+function render(){
+document.getElementById('messages').innerHTML=current.messages.map(m=>
+`<div class="bubble ${m.mine?'mine':''}">${escapeText(m.text)}</div>`
+).join('');
+document.getElementById('messages').scrollTop=999999;
+}
+function escapeText(s){
+let d=document.createElement('div');
+d.textContent=s;
+return d.innerHTML;
+}
+function send(){
+let input=document.getElementById('msg');
+let value=input.value.trim();
+if(!value)return;
+current.messages.push({text:value,mine:true});
+current.last=value;
+localStorage.setItem('merychat_chats',JSON.stringify(chats));
+input.value='';
+render();
+}
+function back(){
+location.href='/?chats=1';
+}
+render();
+</script>
+</body>
+</html>
