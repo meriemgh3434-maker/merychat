@@ -53,12 +53,17 @@ let d=document.createElement('div');
 d.textContent=s;
 return d.innerHTML;
 }
-function send(){
+async function send(){
 let input=document.getElementById('msg');
 let value=input.value.trim();
 if(!value)return;
+let r=await fetch('https://firestore.googleapis.com/v1/projects/merychat-52ce9/databases/(default)/documents/messages',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({fields:{text:{stringValue:value}}})
+});
+if(!r.ok){alert('Mesaj kaydedilemedi');return;}
 current.messages.push({text:value,mine:true});
-fetch('https://firestore.googleapis.com/v1/projects/merychat-52ce9/databases/(default)/documents/messages', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{text:{stringValue:value}}})}).catch(console.error);
 current.last=value;
 localStorage.setItem('merychat_chats',JSON.stringify(chats));
 input.value='';
@@ -66,7 +71,23 @@ render();
 }
 function back(){
 location.href='/?chats=1';
+}async function loadMessages(){
+  try{
+    const r=await fetch('https://firestore.googleapis.com/v1/projects/merychat-52ce9/databases/(default)/documents/messages');
+    const data=await r.json();
+    if(!r.ok) throw new Error('Firebase yüklenemedi');
+    const remote=(data.documents||[]).map(d=>({
+      text:d.fields?.text?.stringValue||'',
+      mine:false
+    })).filter(m=>m.text);
+    current.messages=remote;
+    localStorage.setItem('merychat_chats',JSON.stringify(chats));
+    render();
+  }catch(e){
+    console.log(e);
+  }
 }
+loadMessages();
 render();
 </script>
 </body>
