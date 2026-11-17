@@ -47,3 +47,11 @@ onAuthStateChanged(auth, user => {
   document.getElementById("login").style.display = user ? "none" : "block";
   document.getElementById("home").style.display = user ? "block" : "none";
 });
+
+window.addEventListener("DOMContentLoaded", () => {
+  onAuthStateChanged(auth, user => {
+    document.getElementById("login").style.display = user ? "none" : "block";
+    document.getElementById("home").style.display = user ? "block" : "none";
+    document.getElementById("chat").style.display = "none";
+  });
+});
