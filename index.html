@@ -41,6 +41,7 @@ current.messages=current.messages||[];
 document.getElementById('title').textContent=current.name;
 function render(){
 current.messages=current.messages.filter(m=>!m.text.includes('Import the functions you need'));
+current.messages=current.messages.filter(m=>!m.text.includes('Import the functions you need')&&!m.text.includes('firebaseConfig'));
 localStorage.setItem('merychat_chats',JSON.stringify(chats));
 document.getElementById('messages').innerHTML=current.messages.map(m=>
 `<div class="bubble ${m.mine?'mine':''}">${escapeText(m.text)}</div>`
