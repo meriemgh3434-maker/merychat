@@ -26,9 +26,8 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
+        with:
+          packages: platform-tools
 
       - name: Install Android SDK packages
         run: |
@@ -54,4 +53,3 @@ jobs:
         with:
           name: MeryChat-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
-      
