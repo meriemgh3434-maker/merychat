@@ -3,3 +3,7 @@ dist
 android/.gradle
 android/build
 android/app/google-services.json
+
+.firebase/
+android/hata.txt
+index-yedek.html
