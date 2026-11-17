@@ -32,7 +32,19 @@ footer button{background:#50d6b0;border-radius:50%;width:48px;font-size:20px}
 </style>
 </head>
 <body>
-<div id="home">
+
+<div id="login" style="padding:25px;text-align:center">
+<h2>MERYCHAT GİRİŞ</h2>
+<p>Telefon numaranı ülke koduyla yaz</p>
+<input id="phone" placeholder="+90 5XXXXXXXXX">
+<button onclick="sendCode()">Kod Gönder</button>
+<div id="recaptcha"></div>
+<div id="codeArea" style="display:none;margin-top:20px">
+<input id="code" placeholder="SMS doğrulama kodu">
+<button onclick="verifyCode()">Doğrula</button>
+</div>
+</div>
+<div id="home" style="display:none">
 <header><h2>MERYCHAT</h2><button id="plus" onclick="addMenu()">+</button></header>
 <nav class="tabs">
 <button class="active" onclick="showTab('chats',this)">Sohbetler</button>
@@ -125,5 +137,6 @@ body:JSON.stringify({fields:{text:{stringValue:value}}})
 }
 renderHome();
 </script>
+<script type="module" src="./login.js"></script>
 </body>
 </html>

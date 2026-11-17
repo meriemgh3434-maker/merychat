@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MERYCHAT</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#102c35;color:white;font-family:Arial}
+header{height:65px;background:#19414a;padding:16px;display:flex;align-items:center;justify-content:space-between}
+h2{margin:0;color:#50d6b0}
+button{cursor:pointer;border:0}
+#plus{background:#50d6b0;color:#102c35;border-radius:50%;width:40px;height:40px;font-size:25px}
+.tabs{display:flex;background:#19414a}
+.tabs button{flex:1;padding:15px 3px;background:none;color:#b9d2d3;font-size:14px}
+.tabs button.active{color:#50d6b0;border-bottom:3px solid #50d6b0}
+.page{padding:12px}
+.item{padding:16px;margin:8px 0;background:#19414a;border-radius:13px;display:flex;gap:12px;align-items:center}
+.avatar{width:44px;height:44px;border-radius:50%;background:#50d6b0;color:#102c35;display:grid;place-items:center;font-weight:bold;font-size:18px}
+.info{flex:1}
+.info b{display:block;margin-bottom:6px}
+small{color:#b9d2d3}
+#chat{display:none}
+#chat header{justify-content:flex-start;gap:15px}
+#back{background:none;color:white;font-size:30px}
+#messages{height:calc(100dvh - 145px);overflow:auto;padding:12px}
+.bubble{background:#24515a;padding:12px 15px;margin:9px 0;border-radius:16px;max-width:80%;width:max-content;overflow-wrap:anywhere}
+.mine{background:#167e6c;margin-left:auto}
+footer{position:fixed;bottom:0;left:0;width:100%;padding:10px;background:#19414a;display:flex;gap:8px}
+input{flex:1;min-width:0;padding:14px;border:0;border-radius:22px;font-size:16px}
+footer button{background:#50d6b0;border-radius:50%;width:48px;font-size:20px}
+</style>
+</head>
+<body>
+<div id="home">
+<header><h2>MERYCHAT</h2><button id="plus" onclick="addMenu()">+</button></header>
+<nav class="tabs">
+<button class="active" onclick="showTab('chats',this)">Sohbetler</button>
+<button onclick="showTab('calls',this)">Aramalar</button>
+<button onclick="showTab('status',this)">Durum</button>
+</nav>
+<main id="list" class="page"></main>
+</div>
+<div id="chat">
+<header><button id="back" onclick="goBack()">‹</button><h2 id="chatTitle">Sohbet</h2></header>
+<div id="messages"></div>
+<footer><input id="msg" placeholder="Mesaj yaz..." onkeydown="if(event.key==='Enter')send()"><button onclick="send()">➤</button></footer>
+</div>
+<script>
+let chats=JSON.parse(localStorage.getItem('merychat_chats')||'[]');
+let active=null;
+let tab='chats';
+function save(){localStorage.setItem('merychat_chats',JSON.stringify(chats))}
+function showTab(name,button){
+tab=name;
+document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+button.classList.add('active');
+renderHome();
+}
+function renderHome(){
+let list=document.getElementById('list');
+if(tab==='chats'){
+list.innerHTML=chats.length?'':'<p>Henüz sohbet yok. Yeni sohbet başlatmak için + düğmesine bas.</p>';
+chats.forEach((c,i)=>{
+list.innerHTML+=`<div class="item" onclick="openChat(${i})"><div class="avatar">${escapeHTML(c.name[0]||'M')}</div><div class="info"><b>${escapeHTML(c.name)}</b><small>${escapeHTML(c.last||'Sohbete başla')}</small></div></div>`;
+});
+}else if(tab==='calls'){
+list.innerHTML='<h3>Aramalar</h3><p>Henüz arama yok.</p>';
+}else{
+list.innerHTML='<h3>Durum</h3><div class="item" onclick="newStatus()"><div class="avatar">+</div><div class="info"><b>Durumum</b><small>Durum paylaş</small></div></div><p>Henüz durum paylaşımı yok.</p>';
+}
+}
+function addMenu(){
+let choice=prompt('1: Yeni sohbet\
+2: Grup oluştur');
+if(choice==='1'){
+let name=prompt('Kişinin adını yaz:');
+if(name&&name.trim()){
+chats.push({name:name.trim(),last:'',messages:[]});save();renderHome();
+}
+}else if(choice==='2'){
+let name=prompt('Grup adı:');
+if(name&&name.trim()){
+chats.push({name:name.trim()+' (Grup)',last:'Grup oluşturuldu',messages:[]});save();renderHome();
+}
+}
+}
+function newStatus(){
+let s=prompt('Durumunu yaz:');
+if(s)alert('Durum taslağı: '+s);
+}
+function escapeHTML(s){
+let d=document.createElement('div');d.textContent=s||'';return d.innerHTML;
+}
+function openChat(i){
+active=i;
+document.getElementById('home').style.display='none';
+document.getElementById('chat').style.display='block';
+document.getElementById('chatTitle').textContent=chats[i].name;
+renderMessages();
+}
+function goBack(){
+document.getElementById('chat').style.display='none';
+document.getElementById('home').style.display='block';
+active=null;renderHome();
+}
+function renderMessages(){
+let c=chats[active];
+document.getElementById('messages').innerHTML=(c.messages||[]).map(m=>`<div class="bubble ${m.mine?'mine':''}">${escapeHTML(m.text)}</div>`).join('');
+let box=document.getElementById('messages');box.scrollTop=box.scrollHeight;
+}
+async function send(){
+let input=document.getElementById('msg'),value=input.value.trim();
+if(!value||active===null)return;
+let c=chats[active];
+c.messages=c.messages||[];
+c.messages.push({text:value,mine:true});
+c.last=value;save();input.value='';renderMessages();
+try{
+await fetch('https://firestore.googleapis.com/v1/projects/merychat-52ce9/databases/(default)/documents/messages',{
+method:'POST',headers:{'Content-Type':'application/json'},
+body:JSON.stringify({fields:{text:{stringValue:value}}})
+});
+}catch(e){console.log(e)}
+}
+renderHome();
+</script>
+</body>
+</html>
