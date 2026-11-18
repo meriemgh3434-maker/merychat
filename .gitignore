@@ -7,3 +7,7 @@ android/app/google-services.json
 .firebase/
 android/hata.txt
 index-yedek.html
+
+debug-key-base64.txt
+android/app/src/main/AndroidManifest-onceki.xml
+index-onceki.html

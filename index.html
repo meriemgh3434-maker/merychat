@@ -20,13 +20,13 @@ button{cursor:pointer;border:0}
 .info{flex:1}
 .info b{display:block;margin-bottom:6px}
 small{color:#b9d2d3}
-#chat{display:none}
-#chat header{justify-content:flex-start;gap:15px}
+#chat{display:none;position:fixed;inset:0;z-index:20;background:#102c35;flex-direction:column}
+#chat header{justify-content:flex-start;gap:15px;flex-shrink:0}
 #back{background:none;color:white;font-size:30px}
-#messages{height:calc(100dvh - 145px);overflow:auto;padding:12px}
+#messages{flex:1;min-height:0;overflow-y:auto;padding:12px}
 .bubble{background:#24515a;padding:12px 15px;margin:9px 0;border-radius:16px;max-width:80%;width:max-content;overflow-wrap:anywhere}
 .mine{background:#167e6c;margin-left:auto}
-footer{position:fixed;bottom:0;left:0;width:100%;padding:10px;background:#19414a;display:flex;gap:8px}
+footer{position:static;width:100%;padding:10px;background:#19414a;display:flex;gap:8px;flex-shrink:0}
 input{flex:1;min-width:0;padding:14px;border:0;border-radius:22px;font-size:16px}
 footer button{background:#50d6b0;border-radius:50%;width:48px;font-size:20px}
 </style>
@@ -107,7 +107,7 @@ let d=document.createElement('div');d.textContent=s||'';return d.innerHTML;
 function openChat(i){
 active=i;
 document.getElementById('home').style.display='none';
-document.getElementById('chat').style.display='block';
+document.getElementById('chat').style.display='flex';
 document.getElementById('chatTitle').textContent=chats[i].name;
 renderMessages();
 }
